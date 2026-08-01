@@ -9,11 +9,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, "Microsoft YaHei", sans-serif;
+            font-family: "Microsoft YaHei", system-ui, serif;
         }
         body {
-            background-color: #282c34;
-            color: #e6e9ef;
+            /* 整体米色背景 */
+            background-color: #f5efe0;
+            color: #3a3228;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -22,94 +23,112 @@
             padding: 40px 20px;
             gap: 48px;
         }
+        /* 纸张容器，纸张质感 */
+        .paper-wrap {
+            background: #fffbf0;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 32px;
+            border-radius: 4px;
+            /* 纸张阴影模拟厚度 */
+            box-shadow: 0 8px 20px rgba(120, 105, 80, 0.12), 0 1px 3px rgba(0,0,0,0.08);
+            /* 细微纸张纹理 */
+            background-image: linear-gradient(transparent 31px, #e4ddcd 32px);
+            background-size: 100% 32px;
+        }
         .title-area {
             text-align: center;
+            margin-bottom: 36px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #d8d0bc;
         }
         h1 {
-            color: #c77841;
+            color: #7c5c3b;
             font-weight: 500;
             letter-spacing: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            font-size: 26px;
         }
         .subtitle {
-            color: #a0a8b3;
+            color: #8c7b65;
             font-size: 15px;
         }
         .list-container {
             display: flex;
             flex-direction: column;
-            gap: 22px;
-            width: 100%;
-            max-width: 360px;
+            gap: 20px;
         }
         .game-card {
             display: block;
             text-decoration: none;
             color: inherit;
-            padding: 22px 26px;
-            border: 1px solid #444a55;
-            border-radius: 10px;
-            background-color: #323741;
-            transition: all 0.25s ease;
+            padding: 18px 22px;
+            border: 1px solid #e0d8c6;
+            border-radius: 3px;
+            background-color: #fffdf6;
+            transition: all 0.2s ease;
         }
         .game-card:hover {
-            border-color: #c77841;
-            background-color: #383e4a;
-            transform: translateY(-3px);
+            border-color: #b89b77;
+            background-color: #fff8e6;
+            transform: translateY(-2px);
         }
         .game-card h3 {
-            color: #e6e9ef;
+            color: #5a4732;
             font-size: 18px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
         }
         .game-desc {
             font-size: 14px;
-            color: #a0a8b3;
+            color: #746552;
             line-height: 1.5;
         }
         .lock-text {
-            color: #747b88;
+            color: #a09078;
         }
         footer {
-            margin-top: 30px;
+            margin-top: 20px;
             font-size: 12px;
-            color: #606773;
+            color: #94846e;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="title-area">
-        <h1>规则怪谈解谜合集</h1>
-        <div class="subtitle">认真阅读规则，理性完成每一场场景探索</div>
-    </div>
-
-    <div class="list-container">
-        <!-- 已完成：西郊71路 -->
-        <a href="bus71.html" class="game-card">
-            <h3>西郊71路午夜公交</h3>
-            <div class="game-desc">雨夜搭乘深夜公交，严格遵守候车与乘车规则，平安抵达终点站</div>
-        </a>
-
-        <!-- 已完成：猛男咖啡店 -->
-        <a href="cafe.html" class="game-card">
-            <h3>猛男咖啡店</h3>
-            <div class="game-desc">进店消费请遵守店内告示规则，小心应对店内各色店员与客人</div>
-        </a>
-
-        <!-- 待开发关卡 -->
-        <div class="game-card">
-            <h3>图书馆之夜</h3>
-            <div class="game-desc lock-text">开发中，敬请期待</div>
+    <div class="paper-wrap">
+        <div class="title-area">
+            <h1>规则怪谈解谜合集</h1>
+            <div class="subtitle">细读规则，完成场景解谜小游戏</div>
         </div>
-        <div class="game-card">
-            <h3>山间民宿</h3>
-            <div class="game-desc lock-text">开发中，敬请期待</div>
-        </div>
-    </div>
 
-    <footer>
-        本内容仅为文字解谜小游戏，无真实恐怖元素
-    </footer>
+        <div class="list-container">
+            <!-- 已完成：西郊71路午夜公交 -->
+            <a href="bus71.html" class="game-card">
+                <h3>西郊71路午夜公交</h3>
+                <div class="game-desc">雨夜深夜公交，遵守全部候车乘车规则，平安抵达终点站</div>
+            </a>
+
+            <!-- 已完成：猛男咖啡店 -->
+            <a href="cafe.html" class="game-card">
+                <h3>猛男咖啡店</h3>
+                <div class="game-desc">进店消费需遵守店内告示，谨慎应对店员与其他客人</div>
+            </a>
+
+            <!-- 待开发关卡 -->
+            <div class="game-card">
+                <h3>图书馆之夜</h3>
+                <div class="game-desc lock-text">开发中，敬请期待</div>
+            </div>
+            <div class="game-card">
+                <h3>山间民宿</h3>
+                <div class="game-desc lock-text">开发中，敬请期待</div>
+            </div>
+        </div>
+
+        <footer>
+            本内容仅为休闲文字解谜，不含惊悚恐怖内容
+        </footer>
+    </div>
 </body>
 </html>
