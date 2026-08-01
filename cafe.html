@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猛男咖啡店 · 恐怖搞笑生存</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fce4ec; min-height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Comic Sans MS', cursive, sans-serif; padding: 16px; }
+        .game-container { max-width: 820px; width: 100%; background: #fff0f5; border: 4px solid #d81b60; border-radius: 30px; padding: 28px 24px; box-shadow: 0 0 40px rgba(216,27,96,0.25); }
+        .status-bar { display: flex; justify-content: space-between; color: #ad1457; font-size: 15px; border-bottom: 2px dashed #f06292; padding-bottom: 14px; margin-bottom: 22px; flex-wrap: wrap; gap: 8px 16px; font-weight: bold; }
+        .status-bar .money { color: #2e7d32; background: #e8f5e9; padding: 2px 12px; border-radius: 30px; }
+        .status-bar .scene-label { color: #6a1b9a; }
+        .story-text { color: #4a2c3a; font-size: 18px; line-height: 1.9; min-height: 180px; background: #fff8fa; padding: 20px 22px; border-radius: 20px; border-left: 6px solid #d81b60; margin-bottom: 28px; max-height: 520px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(216,27,96,0.05); white-space: pre-wrap; word-break: break-word; }
+        .story-text p { margin: 0 0 0.6em 0; text-indent: 2em; }
+        .story-text p:last-child { margin-bottom: 0; }
+        .story-text .hl-rule { color: #d81b60; background: #fce4ec; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+        .story-text .hl-money { color: #2e7d32; font-weight: bold; }
+        .story-text .hl-danger { color: #b71c1c; font-weight: bold; }
+        .story-text .bill-item { display: block; text-indent: 2em; font-size: 17px; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
+        .option-btn { background: #fce4ec; border: 2px solid #f06292; color: #4a2c3a; padding: 14px 18px; border-radius: 30px; font-size: 16px; font-family: inherit; text-align: left; cursor: pointer; transition: all 0.2s; font-weight: bold; line-height: 1.4; }
+        .option-btn:hover { background: #ff80ab; color: #fff; transform: scale(1.02); box-shadow: 0 4px 15px rgba(255,128,171,0.4); border-color: #d81b60; }
+        .option-btn:active { transform: scale(0.97); }
+        .reset-area { margin-top: 22px; text-align: center; border-top: 2px dashed #f06292; padding-top: 18px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .reset-btn { background: none; border: 2px solid #f06292; color: #ad1457; padding: 8px 28px; border-radius: 30px; font-family: inherit; font-size: 14px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .reset-btn:hover { background: #ff80ab; color: #fff; border-color: #d81b60; }
+        .story-text::-webkit-scrollbar { width: 6px; }
+        .story-text::-webkit-scrollbar-track { background: #fce4ec; border-radius: 10px; }
+        .story-text::-webkit-scrollbar-thumb { background: #f06292; border-radius: 10px; }
+        @media (max-width: 500px) { .game-container { padding: 16px; } .story-text { font-size: 16px; padding: 16px; max-height: 400px; } .option-btn { font-size: 15px; padding: 12px 16px; } .status-bar { font-size: 13px; } }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="app">
+        <div class="status-bar">
+            <div>💪 猛男咖啡店</div>
+            <div>场景: <span class="scene-label" id="sceneIndicator">门口</span></div>
+            <div class="money">💰 <span id="budgetDisplay">150</span> 元</div>
+        </div>
+        <div class="story-text" id="storyDisplay"></div>
+        <div class="options-grid" id="optionsContainer"></div>
+        <div class="reset-area">
+            <button class="reset-btn" onclick="resetGame()">⟳ 重新探店</button>
+            <button class="reset-btn" onclick="showRules()">📜 再看守则</button>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  猛男咖啡店 · 账单明细版
+        //  沙发区和窗边区已按新逻辑调整
+        // ================================================================
+
+        let budget = 150;
+        let bill = 0;
+        let billItems = [];
+        let currentNodeId = 'start';
+        let prevNodeId = null;
+        let coffeeAdded = false;
+
+        function updateStatus() {
+            document.getElementById('budgetDisplay').textContent = Math.max(0, budget);
+        }
+
+        function addBillItem(desc, amount) {
+            if (amount === undefined || amount === 0) return;
+            bill += amount;
+            billItems.push({ desc: desc, amount: amount });
+        }
+
+        function resetGame() {
+            budget = 150;
+            bill = 0;
+            billItems = [];
+            coffeeAdded = false;
+            prevNodeId = null;
+            currentNodeId = 'start';
+            updateStatus();
+            renderNode('start');
+        }
+
+        function showRules() {
+            if (currentNodeId === 'rules_display') return;
+            prevNodeId = currentNodeId;
+            currentNodeId = 'rules_display';
+            renderNode('rules_display');
+        }
+
+        const gameData = {
+
+            // ---------- 守则 ----------
+            rules_display: {
+                id: 'rules_display',
+                text: `【猛男咖啡店 · 顾客守则】
+
+        1. 不要直视任何店员的胸肌超过3秒，否则会收取“观赏费”（50元/次）。
+        2. 点单时禁止说“随便”，否则会触发“主厨特制”（价格随机×10）。
+        3. 店员对你笑的时候，必须微笑回应，否则会被登记为“冷漠顾客”（加收20元）。
+        4. 餐具请按正确方式使用：叉子配蛋糕，勺子配汤品。用错会收取“餐具补习费”（30元/次）。
+        5. 先喝咖啡，再吃甜品。顺序错了会收取“味觉混乱费”（15元/次）。
+        6. 店员递物品时请双手接收，单手接会被视为“傲慢”（加收10元/次）。
+        7. 结账时请不要看账单，直接刷卡。
+
+        记住这些规则，它们会救你的命——或者送你进后厨。`,
+                options: [ { text: '↩ 返回继续游戏', next: 'rules_back' } ]
+            },
+            rules_back: { id: 'rules_back', text: '', options: [ { text: '继续', next: 'rules_restore' } ] },
+            rules_restore: { id: 'rules_restore', text: '', options: [ { text: '继续', next: 'rules_go_back' } ] },
+
+            // ---------- 主剧情 ----------
+            start: {
+                id: 'start',
+                text: `周末下午，阳光很好，你逛街逛得腿都快断了。你想喝杯咖啡，但商场里的店全满，街边店也排着长队。
+
+        你掏了掏口袋，只剩下150元——这是这个月最后的零花钱了。你决定只喝一杯咖啡，绝对不多花一分钱。
+
+        你在APP上刷到一家“猛男咖啡店”——评分4.9分，评论不多，位置有点偏。
+
+        “评分这么高，为什么没人来？”你嘀咕了一句，但腿实在太酸了，还是按照导航走了过去。
+
+        你穿过两条小巷，拐过一个街角，终于在一栋老建筑的底层找到了它。门面不大，招牌上的字暗红暗红的。
+
+        你推开门——门轴发出“吱呀”一声长响。
+
+        店内空调开得很低，空气中弥漫着咖啡香。吧台后面站着三个身穿黑色紧身背心的猛男，肌肉线条在灯光下泛着光。
+
+        中间那个立刻转过身来——他的脸上挂着一个灿烂的笑容，嘴角上扬到完美的弧度，露出一排白得反光的牙齿。
+
+        他用一种过于阳光的语调说：“欢迎光临！小姐姐想坐哪里都可以哦！”
+
+        声音很热情，但笑容……没有变过。你盯着他看了三秒，那个嘴角的弧度分毫未动，像画上去的。
+
+        你打了个寒颤，移开目光。
+
+        你注意到墙上贴着一张纸，上面写着：
+
+        【猛男咖啡店 · 顾客守则】
+
+        1. 不要直视任何店员的胸肌超过3秒，否则会收取“观赏费”（50元/次）。
+        2. 点单时禁止说“随便”，否则会触发“主厨特制”（价格随机×10）。
+        3. 店员对你笑的时候，必须微笑回应，否则会被登记为“冷漠顾客”（加收20元）。
+        4. 餐具请按正确方式使用：叉子配蛋糕，勺子配汤品。用错会收取“餐具补习费”（30元/次）。
+        5. 先喝咖啡，再吃甜品。顺序错了会收取“味觉混乱费”（15元/次）。
+        6. 店员递物品时请双手接收，单手接会被视为“傲慢”（加收10元/次）。
+        7. 结账时请不要看账单，直接刷卡。
+
+        你下意识摸了摸口袋里的150元，心跳漏了一拍。
+
+        你决定——`,
+                options: [
+                    { text: 'A. 逐条背诵，认真执行', next: 'seat_choice' },
+                    { text: 'B. 这什么鬼店？我偏不信邪！', next: 'seat_impulsive' }
+                ]
+            },
+            seat_impulsive: {
+                id: 'seat_impulsive',
+                text: `你冷哼一声，大摇大摆走进店内，一屁股坐了下来。
+        店员保持着灿烂的笑容走过来：“小姐姐很有个性呢！”
+        你感觉后颈一凉，但他的表情还是那样，嘴角的弧度像钉住了一样。`,
+                options: [
+                    { text: 'A. 不管，照常点单', next: 'seat_choice' },
+                    { text: 'B. 被盯得发毛，改口“我…我按规矩来”', next: 'seat_choice' }
+                ]
+            },
+            seat_choice: {
+                id: 'seat_choice',
+                text: `店员用阳光灿烂的语调问你：“小姐姐想坐哪里呢？我们有沙发区、吧台区和窗边区哦！”
+
+        他一一指过去，每个区域都带着相同的笑容：
+
+        🛋️ 沙发区：“很舒服哦，坐下去就不想起来啦！”
+
+        🍸 吧台区：“可以近距离观看我们制作咖啡呢！”
+
+        🪟 窗边区：“风景很好哦，特别是我们主理人亲手制作的窗花！”`,
+                options: [
+                    { text: 'A. 沙发区', next: 'seat_sofa' },
+                    { text: 'B. 吧台区', next: 'seat_bar' },
+                    { text: 'C. 窗边区', next: 'seat_window' }
+                ]
+            },
+            seat_sofa: {
+                id: 'seat_sofa',
+                text: `你陷进沙发里，确实很软。你刚想调整坐姿，却发现——你被卡住了！沙发像一个巨大的捕兽夹，越陷越深，你挣扎了一下，完全起不来。
+
+        店员走过来，笑容灿烂：“小姐姐需要帮忙吗？”`,
+                options: [
+                    { text: 'A. 努力坐直，试图站起来', next: 'seat_sofa_stuck' },
+                    { text: 'B. 放弃挣扎，躺平算了', next: 'ending_sofa_trap' }
+                ]
+            },
+            seat_sofa_stuck: {
+                id: 'seat_sofa_stuck',
+                text: `你用力扭动身体，试图从沙发的魔爪中挣脱。但每次你刚抬起一点，沙发就吸得更深。
+
+        你绝望地看着店员：“我……我起不来了。”
+
+        店员笑容不变：“好的，请稍等，我们有专业设备。”
+
+        他转身离开，几分钟后开来了一辆闪着警示灯的叉车！你被叉车高高举起，从沙发里“拔”了出来。虽然腿还软，但总算是得救了。
+
+        “小姐姐，救援服务收费50元，已经加到您的账单上了哦。”店员笑容灿烂地补充道。
+
+        你坐回沙发（这次老老实实没再陷进去），好不容易拿起了菜单。`,
+                options: [
+                    { text: '继续点单', next: 'bean_selection', cost: 50, costDesc: '叉车救援费' }
+                ]
+            },
+            ending_sofa_trap: {
+                id: 'ending_sofa_trap',
+                text: `你放弃挣扎，闭上眼睛，任由沙发吞噬自己。柔软的布料包裹了你的全身，你感觉自己在慢慢下沉，像陷入流沙。
+
+        意识模糊前，你听到店员的声音从上方传来：“小姐姐好好休息哦，我们店提供‘永久沙发住宿服务’。”
+
+        你成为了沙发的一部分，永远柔软地存在着。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            seat_bar: {
+                id: 'seat_bar',
+                text: `你坐在吧台前，正对着咖啡机。店员保持着笑容推过来一杯水：“小姐姐请用。”
+        你伸手去接——想起守则上关于单手接物的规定。`,
+                options: [
+                    { text: 'A. 双手恭敬接过', next: 'bean_selection' },
+                    { text: 'B. 单手随意拿起来', next: 'waiter_grab' }
+                ]
+            },
+            waiter_grab: {
+                id: 'waiter_grab',
+                text: `你单手接水，店员的笑容弧度不变，但声音突然变冷了一点：“小姐姐，单手接东西是不礼貌的哦。”
+        他握住你的手：“我们店有‘礼仪矫正服务’，收费50元。”
+        账单增加了50元。你口袋里的150元开始变得紧张。`,
+                options: [ { text: '交钱，继续', next: 'bean_selection', cost: 50, costDesc: '礼仪矫正费' } ]
+            },
+            seat_window: {
+                id: 'seat_window',
+                text: `你坐在窗边，阳光很好。窗玻璃上贴着一张张薄薄的红色剪纸，形状扭曲，隐约能看出人脸的轮廓。
+        店员微笑着递来菜单：“小姐姐你被拍到了哦，会成为我们店的‘今日顾客’展示在门口呢。”`,
+                options: [
+                    { text: 'A. 硬着头皮坐好，点单', next: 'bean_selection' },
+                    { text: 'B. 拉上窗帘', next: 'ending_curtain' }
+                ]
+            },
+            ending_curtain: {
+                id: 'ending_curtain',
+                text: `你伸手去拉窗帘，店员瞬间出现在你身旁，笑容不变：“小姐姐，窗帘不能拉哦，会影响我们店的主理人窗花展示效果呢。”
+
+        你发现窗帘滑轨上涂了一层黏黏的、红色的东西，手被粘住了。你低头一看——那不是颜料，是凝固的血。
+
+        “既然你这么喜欢窗花，不如自己也成为其中一张？”
+
+        你感觉身体被拉平，贴在玻璃上，阳光透过你变成了一幅新的剪纸。路过的行人纷纷拍照。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 选豆 ----------
+            bean_selection: {
+                id: 'bean_selection',
+                text: `你终于坐定了。店员没有递菜单，而是端来了一个深色的木托盘。托盘上摆着三个玻璃罐，里面装着不同颜色的咖啡豆。
+
+        托盘上放着一张厚实的米白色卡片，边缘压着暗纹，上面用工整的手写体写着几行字：
+
+        —— 主理人选豆手记 ——
+
+        <i>埃塞俄比亚的豆子，生在阳光里的花朵与柑橘林间。
+        浅浅烘焙——像清晨的第一缕光，
+        才能留住花瓣上的露水和果实的清甜。
+
+        哥伦比亚的豆子，长在大地与夜晚的交界。
+        中度烘焙——像黄昏的余温，
+        才能唤醒坚果的醇厚与巧克力的回甘。
+
+        曼特宁——是店主私藏的血与骨，
+        或许……你也想成为珍藏的一部分？</i>
+
+        你抬起头，店员正盯着你，笑容的弧度完美如初。他用阳光灿烂的语调说：“读完了吗？那开始选吧。”
+
+        他把三个玻璃罐推到你面前：`,
+                options: [
+                    { text: 'A. 埃塞俄比亚', next: 'roast_choice_ethiopia' },
+                    { text: 'B. 哥伦比亚', next: 'roast_choice_colombia' },
+                    { text: 'C. 曼特宁', next: 'ending_mandheling' }
+                ]
+            },
+            ending_mandheling: {
+                id: 'ending_mandheling',
+                text: `你指了指曼特宁。店员的笑容弧度不变，但语调低了一度：“曼特宁是店主的私藏哦。”
+
+        他转身从吧台下面拿出一个玻璃罐，里面装满了深棕色的咖啡豆，在灯光下泛着诡异的光泽。“既然你选了…那就进来吧。”
+
+        他打开罐子，你感觉一股吸力把你拽了进去，视野瞬间被黑暗吞没。最后听到他的声音从外面传来，依然阳光灿烂：“欢迎成为我们新一批的豆子。”`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            roast_choice_ethiopia: {
+                id: 'roast_choice_ethiopia',
+                text: `店员推出两个罐子，一个颜色偏浅，一个颜色偏深。“请选择烘焙度。”`,
+                options: [
+                    { text: 'A. 浅烘', next: 'flavor_choice_ethiopia' },
+                    { text: 'B. 深烘', next: 'ending_roast_wrong_ethiopia' }
+                ]
+            },
+            ending_roast_wrong_ethiopia: {
+                id: 'ending_roast_wrong_ethiopia',
+                text: `你选了深烘。店员笑着摇摇头，把豆子倒进磨豆机，机器发出尖叫。磨出来的粉末是黑色的，焦糊味扑面而来。“这杯请你喝。”
+        你喝了一口——像烧焦的花瓣。然后你的皮肤开始变黑、变脆，像过火的咖啡豆一样裂开。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            roast_choice_colombia: {
+                id: 'roast_choice_colombia',
+                text: `店员推出两个罐子，一个颜色中等，一个颜色偏深。“请选择烘焙度。”`,
+                options: [
+                    { text: 'A. 中烘', next: 'flavor_choice_colombia' },
+                    { text: 'B. 深烘', next: 'ending_roast_wrong_colombia' }
+                ]
+            },
+            ending_roast_wrong_colombia: {
+                id: 'ending_roast_wrong_colombia',
+                text: `你选了深烘。店员笑着摇头，把豆子倒进意式机，出来的油脂像活物一样蠕动，爬出杯子缠住了你的手。“油脂很丰富呢。”
+        你被咖啡油脂完全包裹，融化成了一块可可脂。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            flavor_choice_ethiopia: {
+                id: 'flavor_choice_ethiopia',
+                text: `店员拿出两个小瓶子，瓶子里装着不同气味的咖啡粉。“最后一步，请选择你喜欢的风味。”`,
+                options: [
+                    { text: 'A. 花香、柑橘', next: 'order_success' },
+                    { text: 'B. 坚果、巧克力', next: 'ending_flavor_wrong_ethiopia', cost: 30, costDesc: '选豆错误费（埃塞配错风味）' }
+                ]
+            },
+            ending_flavor_wrong_ethiopia: {
+                id: 'ending_flavor_wrong_ethiopia',
+                text: `你选了坚果巧克力。店员笑着拿出锤子：“选错了哦。”
+        你被砸成了坚果碎。账单上多了30元“选豆错误费”。后厨的磨豆机已经为你准备好了。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            flavor_choice_colombia: {
+                id: 'flavor_choice_colombia',
+                text: `店员拿出两个小瓶子，瓶子里装着不同气味的咖啡粉。“最后一步，请选择你喜欢的风味。”`,
+                options: [
+                    { text: 'A. 坚果、巧克力', next: 'order_success' },
+                    { text: 'B. 花香、柑橘', next: 'ending_flavor_wrong_colombia', cost: 30, costDesc: '选豆错误费（哥伦比亚配错风味）' }
+                ]
+            },
+            ending_flavor_wrong_colombia: {
+                id: 'ending_flavor_wrong_colombia',
+                text: `你选了花香柑橘。店员笑着把你按在吧台上：“选错了哦，让你尝尝真正的风味。”
+        他开始往你嘴里灌浓缩咖啡，你被灌到窒息。账单上多了30元罚款。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 饮品 ----------
+            order_success: {
+                id: 'order_success',
+                text: `店员露出满意的笑容：“恭喜小姐姐选豆成功！现在为您制作咖啡。”
+        咖啡端上来，拉花是一只眨动的眼睛。你盯着它看了一会儿。
+
+        你瞥了一眼菜单——咖啡的价格是 <span class="hl-money">68元</span>。如果没被罚款就还好，你还有剩余的预算。`,
+                options: [
+                    { text: 'A. 赶紧喝掉', next: 'dessert_selection' },
+                    { text: 'B. 偷偷倒掉', next: 'ending_spill' }
+                ]
+            },
+            ending_spill: {
+                id: 'ending_spill',
+                text: `你趁店员转身倒掉咖啡。他转回来时笑容不变：“小姐姐浪费食物是不好的哦。浪费罚款50元。”
+        花盆里的咖啡渗入土中，一只肌肉虬结的植物手臂伸出来掐住了你的脖子。你被拖进后厨，账单已超支。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 甜品 ----------
+            dessert_selection: {
+                id: 'dessert_selection',
+                text: `你喝了几口咖啡，店员又端着托盘过来了，上面摆着三个玻璃罩子。
+
+        “小姐姐喝咖啡怎么能没有甜品呢？我们店有三款招牌甜点哦。”
+
+        他一个个揭开罩子，菜单上的价格也映入了你的眼帘：
+
+        甜品A：提拉米苏 —— <span class="hl-money">48元</span>
+        “意式经典哦，手指饼干浸满咖啡液，马斯卡彭奶油轻盈如云。”
+
+        甜品B：巴斯克芝士蛋糕 —— <span class="hl-money">52元</span>
+        “焦香表皮，内里绵密，芝士控的最爱哦。”
+
+        甜品C：红丝绒蛋糕 —— <span class="hl-money">58元</span>
+        “艳丽的红色，是我们店的独家配方哦。”
+
+        你的目光扫过三款甜品，他的笑容固定在脸上，等着你选。`,
+                options: [
+                    { text: 'A. 提拉米苏', next: 'utensil_use', cost: 48, costDesc: '提拉米苏' },
+                    { text: 'B. 巴斯克芝士蛋糕', next: 'utensil_use', cost: 52, costDesc: '巴斯克芝士蛋糕' },
+                    { text: 'C. 红丝绒蛋糕', next: 'ending_red_velvet', cost: 58, costDesc: '红丝绒蛋糕' },
+                    { text: 'D. 不点甜品了', next: 'ending_no_dessert' }
+                ]
+            },
+            ending_red_velvet: {
+                id: 'ending_red_velvet',
+                text: `你选了红丝绒。店员笑容不变：“小姐姐眼光很好呢。”
+        他切开蛋糕——里面是鲜红色的。你咬了一口，尝到一丝铁锈味。
+        “这是我们店的独家配方哦。”
+        你感觉意识开始模糊，耳边最后听到的是：“58元加上你之前的账单……刚好超过150元呢。欢迎加入后厨。”`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            ending_no_dessert: {
+                id: 'ending_no_dessert',
+                text: `你摇头：“我不吃甜品了，结账吧。”
+        店员笑容不变：“小姐姐，我们店的规矩是‘咖啡必须配甜品’哦。不点甜品的话……要收‘用餐不完整费’，80元。”
+        你算了算：咖啡68+不完整费80=148元，已经很接近150了。你开始紧张。`,
+                options: [
+                    { text: 'A. 接受罚款，直接结账', next: 'early_bill_check', cost: 80, costDesc: '用餐不完整费' },
+                    { text: 'B. 坚持不点', next: 'ending_forced_grind' }
+                ]
+            },
+            ending_forced_grind: {
+                id: 'ending_forced_grind',
+                text: `你坚持不点甜品。店员的笑容弧度不变，但语调低了一度：“那……就按规矩办了。”
+        两个店员走过来，一左一右架住你的胳膊。“后厨缺人手磨豆子，小姐姐正好补上。”
+        铁门在身后关闭，磨豆机轰隆作响。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 餐具 ----------
+            utensil_use: {
+                id: 'utensil_use',
+                text: `选好的甜品端上来了。桌上摆着：
+
+        🔪 一把闪亮的刀
+
+        🍴 一支精致的叉子
+
+        🥄 一把圆润的勺子
+
+        你想起守则上关于餐具使用的规定——叉子配蛋糕，勺子配汤品，用错要收30元“餐具补习费”。`,
+                options: [
+                    { text: 'A. 用叉子', next: 'smile_check' },
+                    { text: 'B. 用勺子', next: 'utensil_wrong', cost: 30, costDesc: '餐具补习费（用勺子吃蛋糕）' },
+                    { text: 'C. 用刀', next: 'utensil_knife', cost: 30, costDesc: '餐具补习费（用刀切蛋糕）' }
+                ]
+            },
+            utensil_wrong: {
+                id: 'utensil_wrong',
+                text: `你用勺子挖蛋糕。店员笑着出现：“小姐姐，勺子是用来喝汤的哦。餐具补习费30元。”
+        他拿出一本厚厚的《餐具使用规范》放在你面前：“请现场学习一下。”
+        你被迫读完了一整本，脑袋被砸晕。`,
+                options: [ { text: '继续', next: 'smile_check' } ]
+            },
+            utensil_knife: {
+                id: 'utensil_knife',
+                text: `你拿起刀切蛋糕。店员瞬间出现：“刀是用来切牛排的哦。餐具补习费30元。”
+        他拿起刀，刀尖对着你：“要不要试试真正的刀法？”
+        你被吓晕了。`,
+                options: [ { text: '继续', next: 'smile_check' } ]
+            },
+
+            // ---------- 微笑 ----------
+            smile_check: {
+                id: 'smile_check',
+                text: `你终于吃上了蛋糕。这时，三个店员同时转向你，露出标准的灿烂微笑——嘴角弧度一模一样的整齐。
+
+        你记得守则上写着：必须对店员的微笑做出回应，否则会被登记为“冷漠顾客”，加收20元。
+
+        你看着三张一模一样的笑脸，嘴角开始抽搐。`,
+                options: [
+                    { text: 'A. 努力挤出一个笑容', next: 'bill_check' },
+                    { text: 'B. 吓得笑不出来', next: 'ending_smile_fail', cost: 20, costDesc: '冷漠费（不回应微笑）' },
+                    { text: 'C. 笑到僵硬', next: 'bill_check' }
+                ]
+            },
+            ending_smile_fail: {
+                id: 'ending_smile_fail',
+                text: `你笑不出来。店员的笑容弧度不变，但三人同时朝你走来：“小姐姐不笑的话，我们会很失望的。冷漠费20元。”
+        他们围住你，开始给你讲冷笑话。你被冻住了，身体僵硬如冰雕。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 结账 ----------
+            bill_check: {
+                id: 'bill_check',
+                text: `店员端来账单：“小姐姐请结账。”
+        你想起守则上说，结账时不要看账单，直接刷卡。但你知道——你只剩150元，必须知道总额是否超了。
+        你心里七上八下，手心里全是汗。`,
+                options: [
+                    { text: 'A. 直接递卡', next: 'ending_escape' },
+                    { text: 'B. 看了一眼账单', next: 'ending_bill_look' }
+                ]
+            },
+            ending_bill_look: {
+                id: 'ending_bill_look',
+                text: `你忍不住瞟了一眼账单。上面清楚地列着各项费用：
+
+        [BILL_DETAILS]
+
+        总金额：<span class="hl-money" id="totalDisplay"></span> 元
+
+        你的手心开始冒汗。店员微笑着注视你：“看到了吗？如果超过150元……后厨还缺一个人。”`,
+                options: [ { text: '继续结账', next: 'ending_bill_final' } ]
+            },
+            ending_bill_final: {
+                id: 'ending_bill_final',
+                text: `你深吸一口气，决定不再犹豫。你递出卡片，等待命运的宣判。`,
+                options: [ { text: '递卡', next: 'ending_escape' } ]
+            },
+            ending_escape: {
+                id: 'ending_escape',
+                text: `你递出卡片，心跳如鼓。
+
+        店员刷卡，微笑着递回卡片：“感谢光临！您的账单一共……”他顿了一下，“没有超支，小姐姐可以走了哦。”
+
+        你拿回卡，冲出店门。阳光洒在身上，你低头检查手机银行——余额还有剩余。你花了不到150元，刚刚好。
+
+        你回头看了一眼——店员的笑容还贴在玻璃门后面，朝你挥手，嘴角弧度纹丝不动。
+
+        你低头，手里多了一张卡片：“你通过了。但你的影子…留在了店里。”
+
+        ✨ 结局：你逃出来了。虽然几乎破产，但至少你还在外面。`,
+                options: [ { text: '🔄 重新探店', next: 'start' } ]
+            },
+            ending_grind: {
+                id: 'ending_grind',
+                text: `你的账单超支了！店员们微笑着围过来，笑容整齐划一。
+
+        “小姐姐，您的账单已经超过150元了哦。根据守则，您需要留在后厨帮忙磨豆子。”
+
+        你被架起来，拖向铁门。门后传来轰隆隆的声响，空气里弥漫着焦苦的咖啡粉味道。
+
+        “别担心，我们会给您安排一个合适的罐子的。”
+
+        铁门关闭，世界陷入黑暗和机械的轰鸣。
+
+        💀 结局：你因为账单超支，被永远留在了后厨磨豆子。你的150元成了店里的收入。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+            early_bill_check: {
+                id: 'early_bill_check',
+                text: `你决定接受罚款并结账。店员微笑：“好的，请稍等。”
+        账单即将出炉。你能否安全离开，取决于之前的罚款总额。`,
+                options: [
+                    { text: 'A. 直接递卡', next: 'ending_escape' },
+                    { text: 'B. 看一眼账单', next: 'ending_bill_look' }
+                ]
+            }
+        };
+
+        // ================================================================
+        //  渲染引擎
+        // ================================================================
+
+        function renderNode(nodeId) {
+            const node = gameData[nodeId];
+            if (!node) {
+                document.getElementById('storyDisplay').innerHTML = '<p>⚠️ 咖啡店崩塌，请刷新。</p>';
+                document.getElementById('optionsContainer').innerHTML = '';
+                return;
+            }
+
+            if (nodeId === 'rules_back' || nodeId === 'rules_restore' || nodeId === 'rules_go_back') {
+                if (prevNodeId && gameData[prevNodeId]) {
+                    currentNodeId = prevNodeId;
+                    prevNodeId = null;
+                    renderNode(currentNodeId);
+                } else {
+                    currentNodeId = 'start';
+                    renderNode('start');
+                }
+                return;
+            }
+
+            if ((nodeId === 'bill_check' || nodeId === 'early_bill_check') && !coffeeAdded) {
+                addBillItem('咖啡', 68);
+                coffeeAdded = true;
+            }
+
+            updateStatus();
+
+            let rawText = node.text;
+            rawText = rawText.replace(/「(.*?)」/g, '<span class="hl-rule">「$1」</span>');
+            rawText = rawText.replace(/(\d+)元/g, '<span class="hl-money">$1元</span>');
+            rawText = rawText.replace(/💀/g, '<span class="hl-danger">💀</span>');
+            rawText = rawText.replace(/✨/g, '<span style="color:#d81b60;">✨</span>');
+
+            if (nodeId === 'ending_bill_look') {
+                let detailsHtml = '';
+                if (billItems.length === 0) {
+                    detailsHtml = '<span class="bill-item">（暂无费用）</span>';
+                } else {
+                    billItems.forEach(item => {
+                        detailsHtml += `<span class="bill-item">${item.desc}：<span class="hl-money">${item.amount}元</span></span>`;
+                    });
+                }
+                rawText = rawText.replace('[BILL_DETAILS]', detailsHtml);
+                let total = bill;
+                rawText = rawText.replace('<span class="hl-money" id="totalDisplay"></span>', `<span class="hl-money">${total}</span>`);
+            }
+
+            const paragraphs = rawText.split(/\n\s*\n/).filter(p => p.trim() !== '');
+            const htmlContent = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+            document.getElementById('storyDisplay').innerHTML = htmlContent;
+
+            const sceneName = node.id;
+            let sceneLabel = '门口';
+            if (sceneName === 'rules_display') sceneLabel = '守则';
+            else if (sceneName.startsWith('seat')) sceneLabel = '选座';
+            else if (sceneName.startsWith('bean') || sceneName.startsWith('roast') || sceneName.startsWith('flavor')) sceneLabel = '选豆';
+            else if (sceneName.startsWith('order')) sceneLabel = '饮品';
+            else if (sceneName.startsWith('dessert')) sceneLabel = '甜品';
+            else if (sceneName.startsWith('utensil')) sceneLabel = '餐具';
+            else if (sceneName.startsWith('smile')) sceneLabel = '微笑';
+            else if (sceneName.startsWith('bill') || sceneName.startsWith('early')) sceneLabel = '结账';
+            else if (sceneName.startsWith('ending')) sceneLabel = '结局';
+            document.getElementById('sceneIndicator').textContent = sceneLabel;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            if (node.options && node.options.length > 0) {
+                node.options.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt.text;
+                    btn.addEventListener('click', function() {
+                        let target = opt.next;
+                        if (opt.cost && opt.costDesc) {
+                            addBillItem(opt.costDesc, opt.cost);
+                        } else if (opt.cost && !opt.costDesc) {
+                            addBillItem('费用', opt.cost);
+                        }
+
+                        if (target === 'ending_escape') {
+                            if (bill > 150) {
+                                target = 'ending_grind';
+                            }
+                        }
+
+                        if (gameData[target]) {
+                            currentNodeId = target;
+                            renderNode(currentNodeId);
+                        } else {
+                            resetGame();
+                        }
+                    });
+                    container.appendChild(btn);
+                });
+            } else {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'option-btn';
+                resetBtn.textContent = '重新开始';
+                resetBtn.addEventListener('click', resetGame);
+                container.appendChild(resetBtn);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        resetGame();
+    </script>
+</body>
+</html>
