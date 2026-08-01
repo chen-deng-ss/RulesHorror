@@ -1,982 +1,115 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>西郊71路 · 午夜公交规则怪谈</title>
+    <title>规则怪谈解谜合集</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: system-ui, "Microsoft YaHei", sans-serif;
         }
         body {
-            background: #0a0a0a;
+            background-color: #282c34;
+            color: #e6e9ef;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            font-family: 'Courier New', monospace;
-            padding: 16px;
+            justify-content: center;
+            padding: 40px 20px;
+            gap: 48px;
         }
-        .game-container {
-            max-width: 780px;
-            width: 100%;
-            background: #141414;
-            border: 1px solid #2a2a2a;
-            border-radius: 16px;
-            padding: 28px 24px;
-            box-shadow: 0 0 50px rgba(80, 0, 0, 0.15);
-            position: relative;
+        .title-area {
+            text-align: center;
         }
-        .game-container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0) 4px);
-            pointer-events: none;
-            border-radius: 16px;
+        h1 {
+            color: #c77841;
+            font-weight: 500;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
         }
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 13px;
-            border-bottom: 1px dashed #2a2a2a;
-            padding-bottom: 14px;
-            margin-bottom: 22px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            flex-wrap: wrap;
-            gap: 6px;
+        .subtitle {
+            color: #a0a8b3;
+            font-size: 15px;
         }
-        .status-bar .scene-label {
-            color: #8b0000;
-            font-weight: bold;
-        }
-        .status-bar .safety {
-            color: #aaa;
-        }
-        .status-bar .danger {
-            color: #aaa;
-        }
-        .status-bar .escape {
-            color: #d4d47d;
-        }
-        .story-text {
-            color: #d0d0d0;
-            font-size: 17px;
-            line-height: 1.9;
-            min-height: 160px;
-            background: #0f0f0f;
-            padding: 20px 22px;
-            border-radius: 8px;
-            border-left: 3px solid #3a3a3a;
-            margin-bottom: 28px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .story-text p {
-            text-indent: 2em;
-            margin: 0 0 0.5em 0;
-        }
-        .story-text p:last-child {
-            margin-bottom: 0;
-        }
-        .story-text .hl-rule {
-            color: #ffaa33;
-            background: rgba(255, 170, 51, 0.08);
-            padding: 1px 6px;
-            border-radius: 4px;
-        }
-        .story-text .hl-danger {
-            color: #ff4d4d;
-        }
-        .story-text .hl-safe {
-            color: #7ddf7d;
-        }
-        .story-text .hl-glow {
-            animation: glitchText 1.2s infinite alternate;
-        }
-        @keyframes glitchText {
-            0% {
-                opacity: 1;
-                text-shadow: 0 0 2px rgba(255, 0, 0, 0.3);
-            }
-            100% {
-                opacity: 0.85;
-                text-shadow: 2px 0 rgba(255, 0, 0, 0.2), -2px 0 rgba(0, 0, 255, 0.2);
-            }
-        }
-        .options-grid {
+        .list-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 22px;
+            width: 100%;
+            max-width: 360px;
         }
-        .option-btn {
-            background: #1c1c1c;
-            border: 1px solid #333;
-            color: #b8b8b8;
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Courier New', monospace;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            letter-spacing: 0.3px;
+        .game-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 22px 26px;
+            border: 1px solid #444a55;
+            border-radius: 10px;
+            background-color: #323741;
+            transition: all 0.25s ease;
+        }
+        .game-card:hover {
+            border-color: #c77841;
+            background-color: #383e4a;
+            transform: translateY(-3px);
+        }
+        .game-card h3 {
+            color: #e6e9ef;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .game-desc {
+            font-size: 14px;
+            color: #a0a8b3;
             line-height: 1.5;
         }
-        .option-btn:hover {
-            background: #261818;
-            border-color: #555;
-            color: #fff;
-            transform: translateX(5px);
-            box-shadow: 0 0 24px rgba(100, 100, 100, 0.1);
+        .lock-text {
+            color: #747b88;
         }
-        .option-btn:active {
-            transform: scale(0.97);
-        }
-        .reset-area {
-            margin-top: 22px;
-            text-align: center;
-            border-top: 1px solid #1f1f1f;
-            padding-top: 18px;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-        .reset-btn {
-            background: none;
-            border: 1px solid #333;
-            color: #555;
-            padding: 8px 28px;
-            border-radius: 30px;
-            font-family: inherit;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-            letter-spacing: 1px;
-        }
-        .reset-btn:hover {
-            color: #aaa;
-            border-color: #666;
-            background: #1a1a1a;
-        }
-        .story-text::-webkit-scrollbar {
-            width: 4px;
-        }
-        .story-text::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-        .story-text::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
-            border-radius: 4px;
-        }
-        @media (max-width: 500px) {
-            .game-container {
-                padding: 16px;
-            }
-            .story-text {
-                font-size: 15px;
-                padding: 14px 16px;
-                max-height: 380px;
-            }
-            .option-btn {
-                font-size: 14px;
-                padding: 12px 14px;
-            }
-            .status-bar {
-                font-size: 11px;
-            }
+        footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #606773;
         }
     </style>
 </head>
 <body>
-    <div class="game-container" id="app">
-        <div class="status-bar">
-            <div>🚌 西郊71路 · 午夜</div>
-            <div>场景: <span class="scene-label" id="sceneIndicator">候车</span></div>
-            <div>状态: <span id="statusIndicator" class="safety">观察</span></div>
+    <div class="title-area">
+        <h1>规则怪谈解谜合集</h1>
+        <div class="subtitle">认真阅读规则，理性完成每一场场景探索</div>
+    </div>
+
+    <div class="list-container">
+        <!-- 已完成：西郊71路 -->
+        <a href="bus71.html" class="game-card">
+            <h3>西郊71路午夜公交</h3>
+            <div class="game-desc">雨夜搭乘深夜公交，严格遵守候车与乘车规则，平安抵达终点站</div>
+        </a>
+
+        <!-- 已完成：猛男咖啡店 -->
+        <a href="cafe.html" class="game-card">
+            <h3>猛男咖啡店</h3>
+            <div class="game-desc">进店消费请遵守店内告示规则，小心应对店内各色店员与客人</div>
+        </a>
+
+        <!-- 待开发关卡 -->
+        <div class="game-card">
+            <h3>图书馆之夜</h3>
+            <div class="game-desc lock-text">开发中，敬请期待</div>
         </div>
-        <div class="story-text" id="storyDisplay"></div>
-        <div class="options-grid" id="optionsContainer"></div>
-        <div class="reset-area">
-            <button class="reset-btn" onclick="resetGame()">⟳ 遗忘规则 · 重新候车</button>
-            <button class="reset-btn" onclick="showRules()">📜 查看候车须知</button>
+        <div class="game-card">
+            <h3>山间民宿</h3>
+            <div class="game-desc lock-text">开发中，敬请期待</div>
         </div>
     </div>
-    <script>
-        // ================================================================
-        //  🚌  西郊71路午夜公交站  ·  最终版（含内心活动）
-        //  修改：场景7选项C已加上字母“C.”
-        // ================================================================
 
-        const gameData = {
-
-            start: {
-                id: 'start',
-                text: `🌧️ 雨夜，你站在西郊公交总站。
-
-        你加班到深夜，头昏脑涨，只想快点回家。暴雨从傍晚一直下到现在，站台顶棚漏雨，老旧路灯忽明忽暗，整个世界都像是泡在水里。
-
-        你低头，看见座椅缝隙里压着一张皱巴巴的纸条，上面写着：
-
-        「西郊总站 · 午夜候车须知」<br>
-        1. 本站日间常规运营线路为 71 路，夜间会有编号杂乱的过路临时班车，建议仅搭乘 71 路公交返程。<br>
-        2. 候车长椅左侧区域可短暂落座休息，尽量不要长时间倚靠、坐在长椅右侧位置，中途不要随意更换座位。<br>
-        3. 若站台广播播放寻人、寻物播报，请安静原地等候，不必四处张望、主动回应广播内容。<br>
-        4. 深夜站台人流稀少，请勿随意收下陌生候车乘客递来的任何物品。<br>
-        5. 站牌张贴的发车时刻表仅作白天参考，夜间车辆到站时间极易错乱，不必完全依照表上时间等候。<br>
-        6. 若偶遇身穿黑色雨衣的路人，不要主动抬头对视，也不要上前搭话；如果对方主动和你交谈，全程保持沉默即可。<br>
-        7. 公交进站后先看清车头线路标识，文明礼让有序排队候车，切勿抢先登车。<br>
-        8. 站内地下换乘通道凌晨一点整封闭停用；凌晨一点前，没有紧急需求，不要独自走进通道深处。<br>
-        9. 若你的影子出现扭曲、拉长、来回晃动的异常情况，请原地静止站立，不要随意走动，等待影子恢复正常形态。
-
-        你叹了口气，觉得这多半是某个无聊人的恶作剧——这种深夜套路，电影里看多了。但莫名地，你还是将纸条折好收进了口袋。你抬头望向远处空荡的街道，没有半点车灯的光亮。雨，却越下越大了，湿冷的风吹得你打了个寒颤。你心想：管他什么规则，先等到车再说。`,
-                options: [
-                    { text: '进入站台，开始候车', next: 'act1' }
-                ]
-            },
-
-            act1: {
-                id: 'act1',
-                text: `你拖着重重的步子走进站台，浑身湿漉漉的，只想找个地方坐下。站台顶棚漏下的雨水滴答作响，老旧路灯忽明忽暗，把一切都照得模糊不清。中间那条木制长椅湿了一半，在灯光下泛着暗沉的光。
-
-        你揉了揉太阳穴，心里嘀咕：左边还是右边？那个纸条上写的“左侧”到底是以什么方向为准？是面向马路，还是背对公交？光影交错，雨雾弥漫，根本辨不清。你环顾四周，站台上零星站着几个人，都垂着头，疲惫得像纸片人，脸色看不真切，沉默得让人发毛。
-
-        你站在那儿，脑子里两个声音在打架——一个说：“坐一会儿吧，腿都要断了。”另一个说：“别冒险，站着最稳妥。”雨声嘈杂，你攥紧口袋里的纸条，迟迟下不了决心。`,
-                options: [
-                    { text: 'A. 沿站台边缘缓慢站立等候', next: 'act1_a' },
-                    { text: 'B. 擦干净长椅左侧水渍，坐下休息', next: 'act1_b' },
-                    { text: 'C. 直接坐在长椅潮湿的右侧区域', next: 'act1_c' }
-                ]
-            },
-            act1_a: {
-                id: 'act1_a',
-                text: `你深吸一口气，最终决定信那条纸条一回——不坐，站着。你退到站台边缘，背靠广告牌，尽量让身体少淋雨。虽然腿酸得要命，但你心里踏实了一些。雨雾只在脚边流动，没有阴冷的气息贴近。你感觉到暗处似乎有道目光扫过你，但很快又移开了，像是对你失去了兴趣。你暗自庆幸：还好没碰那把椅子。`,
-                options: [
-                    { text: '继续候车', next: 'act2' }
-                ]
-            },
-            act1_b: {
-                id: 'act1_b',
-                text: `💀 你想：“管他什么左右，左边总该安全吧。”你擦了擦长椅左侧的水渍，一屁股坐了下去。但就在坐下的瞬间，你感觉一阵眩晕——长椅仿佛被无形的力量转动了方向，你认定的“左侧”竟变成了禁忌区。你想起身，双腿却像灌了铅。怨灵的气息从椅面渗入你的后背，你意识到自己已经被标记了。当晚所有 71 路都会跳过这个站台，你将被困在这雨夜的循环里，永远等不到回家的车。
-
-        💀 结局：雨夜站台 · 永无止境的等候`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act1_c: {
-                id: 'act1_c',
-                text: `💀 你太累了，管不了那么多，一屁股坐在了长椅的右侧。潮湿的木板冷得刺骨，你打了个哆嗦，正想抱怨，却发现身体开始僵住——你的影子像活了一样，慢慢脱离你的脚底，像黑色的水一样流向椅底。你想呼救，喉咙却发不出任何声音。你成为了这个站台永久的亡魂之一，永远坐在那张长椅上。
-
-        💀 结局：影子剥离 · 永驻站台`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act2: {
-                id: 'act2',
-                text: `你站了很久，雨还是不停，外套已经完全湿透，冷风一吹，你忍不住打了几个喷嚏。就在你低头擦脸上的雨水时，余光瞥见浓稠的雨雾里有人影在移动。你抬头，看见一个穿黑色雨衣的人撑着伞，正不紧不慢地朝你走来。奇怪的是，他的脚步一点声音都没有，仿佛飘在地面上。他走到你面前，从口袋里掏出一包未拆封的纸巾，安静地递到你面前，等着你收下。
-
-        你愣住了。这大半夜的，荒郊野外的公交站，突然有人给你递纸巾？你心里警铃大作，想起纸条上那句“勿随意收下陌生候车乘客递来的任何物品”。可你浑身湿透，又冷得发抖，那包纸巾看起来干干净净，让人忍不住想接。你犹豫了——也许只是好心人？但为什么他的衣服一点都没湿？你咽了口唾沫，脑子飞快转着。`,
-                options: [
-                    { text: 'A. 假装没看见，不理睬对方', next: 'act2_a' },
-                    { text: 'B. 伸手接过纸巾，拆开擦拭身上雨水', next: 'act2_b' },
-                    { text: 'C. 接过纸巾拿在手中观望对方', next: 'act2_c' }
-                ]
-            },
-            act2_a: {
-                id: 'act2_a',
-                text: `你偏过头，假装在看远处的路牌，完全无视那只递纸巾的手。几秒钟后，你感到那人的视线在你脸上停留了片刻，然后他缓缓收回手。你余光瞥见他的眼神变得空洞，像一具空壳，他转身，走回雨雾里，消失得无影无踪。你长舒一口气，暗自庆幸自己守住了规矩。`,
-                options: [
-                    { text: '继续等待', next: 'act3' }
-                ]
-            },
-            act2_b: {
-                id: 'act2_b',
-                text: `💀 你太冷了，心想“一包纸巾而已，能有什么问题”，便接过来拆开，擦掉脸上的雨水。但纸巾接触皮肤的瞬间，一股冰寒刺骨的阴气顺着手臂钻入体内，你打了个冷战，低头一看——自己的影子开始变得透明。你惊恐地发现，自己正在一点点消失，最终化作了那些滞留亡魂的一部分。
-
-        💀 结局：阴气入体 · 同化亡魂`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act2_c: {
-                id: 'act2_c',
-                text: `💀 你犹豫了一下，还是伸手接过了纸巾，但不敢拆开，只是握在手里。那包纸巾冰冷得像块冰，你捏着它，心里越来越不安。你抬头想看看那人的表情，却发现他已经退到了雨雾深处，远远地站着，像是在等着什么。你知道，自己已经被锁定了。之后无论你怎样遵守规则，公交都不会再为你停下。
-
-        💀 结局：阴气锁定 · 公交永不停靠`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act3: {
-                id: 'act3',
-                text: `那个穿雨衣的人刚走，站台的喇叭突然“滋啦”一声响了起来，把你吓了一跳。接着，一个冰冷的机械女声开始循环播报：“温馨提示，请 XX 乘客尽快前往站台中心认领遗失钱包。” 那念的正是你的全名！你下意识摸向背包夹层——钱包真的不见了。你心里一紧：什么时候丢的？难道刚才那个人……你正想迈步去找，忽然想起纸条上第三条：不要回应广播。你僵在原地，心里两个念头疯狂拉锯：钱包里有身份证和所有银行卡，丢了怎么办？可如果回应了广播，是不是就中了什么圈套？雨声哗哗，广播一遍遍重复，你的脚像钉在地上一样。`,
-                options: [
-                    { text: 'A. 低头看向地面，全程不动，完全无视广播', next: 'act3_a' },
-                    { text: 'B. 转身走入雨雾，寻找刚才的陌生人求助', next: 'act3_b' },
-                    { text: 'C. 离开原地，在站台四处翻找丢失的钱包', next: 'act3_c' }
-                ]
-            },
-            act3_a: {
-                id: 'act3_a',
-                text: `你攥紧拳头，强迫自己低下头，盯着脚下的水洼，不去看任何地方。广播声越来越急促，像在催促你，但你纹丝不动。十几遍之后，声音突然断了，像磁带被强行扯断。你听到远处传来引擎的低吼——公交车来了。你松了一口气，知道自己赌对了。`,
-                options: [
-                    { text: '前往站台候车', next: 'act7' }
-                ]
-            },
-            act3_b: {
-                id: 'act3_b',
-                text: `你咬了咬牙，决定去追那个陌生人——也许钱包就在他那里。你冲进雨雾，在站台尽头看见那个人背对着你，静立不动，周身缠绕着白雾。你走到他身后，他却始终没有回头。你心里发毛，但既然来了，只能硬着头皮继续。`,
-                options: [
-                    { text: '继续探查', next: 'act4' }
-                ]
-            },
-            act3_c: {
-                id: 'act3_c',
-                text: `💀 你实在放心不下钱包，开始在站台各处翻找，长椅下、垃圾桶旁、广告牌后面……你找了很久，什么也没找到。广播声不知什么时候变成了冷笑，你心里一凉——你被判定为“自愿回应”，当晚所有 71 路直接绕行。你在雨中等了一夜，直到天亮，也没等到任何车。
-
-        💀 结局：自愿滞留 · 被遗忘的站台`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act4: {
-                id: 'act4',
-                text: `你站在那陌生人的背后，雨声几乎掩盖了一切，只有你粗重的呼吸声。他仍然背对着你，白雾从脚下升起，像活物一样缠绕着他的腿。你心里七上八下：要不要开口？还是继续等？这个人到底是不是活人？你想起纸条上的规则，但此刻你已经走入了支线，只能自己判断。`,
-                options: [
-                    { text: 'A. 开口呼唤对方，询问钱包下落', next: 'act4_a' },
-                    { text: 'B. 安静站在一旁，等待对方主动转头', next: 'act4_b' },
-                    { text: 'C. 伸手翻抢对方随身物品，试图拿回钱包', next: 'act4_c' }
-                ]
-            },
-            act4_a: {
-                id: 'act4_a',
-                text: `💀 你终于忍不住喊了一声：“喂！我的钱包是不是在你那儿？”话音刚落，那人缓缓转过头来——你看到了一张苍白扭曲的脸，紧接着一股巨力将你拉入塌方幻境。你永久地背对站台，循环等候着那个永远不会回头的人。
-
-        💀 结局：替换规则 · 永世背对`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act4_b: {
-                id: 'act4_b',
-                text: `你决定按兵不动，就这么站着。几秒钟后，那人开口了，声音像从水底传来：“我在……地下通道里捡到了你的钱包。你要不要……跟我去拿？”他侧过身，做出“请”的姿势。你犹豫了一下，心想：地下通道……规则说不到万不得已不要进去，但钱包在那里……你最终决定跟随。`,
-                options: [
-                    { text: '跟随前往', next: 'act5' }
-                ]
-            },
-            act4_c: {
-                id: 'act4_c',
-                text: `💀 你失去了耐心，直接伸手去抢他身上的东西。就在你的手指触碰到他衣角的瞬间，整片雨雾像爆炸一样包裹了你，你感到脚下一空，坠入无尽的塌方循环。在坠落时，你看到那人的脸变成了你自己的样子。
-
-        💀 结局：激怒怨灵 · 无限塌方`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act5: {
-                id: 'act5',
-                text: `你跟着那人来到地下通道入口，手机屏幕显示 01:10。距离凌晨一点封闭还有五十分钟。通道里涌出阵阵白雾，深处传来凌乱的脚步声，像是很多人同时在走动。那人站在入口处，回头示意你跟上。你心里打鼓：规则说非必要不要进通道，可钱包确实在里面……你站在台阶边缘，冷风从下面灌上来，你忍不住缩了缩脖子。`,
-                options: [
-                    { text: 'A. 立刻转身远离通道入口，绝不靠近半步', next: 'act5_a' },
-                    { text: 'B. 跟随路人迈步走进通道深处', next: 'act5_b' },
-                    { text: 'C. 停在台阶边缘，探头窥探通道内部', next: 'act5_c' }
-                ]
-            },
-            act5_a: {
-                id: 'act5_a',
-                text: `你最终还是克服了好奇心——钱包可以再补办，命只有一条。你转身大步走回候车区，身后传来一声若有若无的叹息。你一路小跑，直到回到站台上，才敢回头。通道的雾气渐渐散开，那个陌生人也消失了。你听见远处有车声，71路正向你驶来。`,
-                options: [
-                    { text: '前往站台', next: 'act7' }
-                ]
-            },
-            act5_b: {
-                id: 'act5_b',
-                text: `💀 你咬了咬牙，跟着他走了进去。脚步刚踏入通道，四周的墙壁就扭曲变形，头顶传来轰隆声，碎石和泥土倾泻而下——你被塌方废墟包裹，永远困在了坍塌的夹层里。
-
-        💀 结局：塌方幻境 · 永困夹层`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act5_c: {
-                id: 'act5_c',
-                text: `💀 你站在台阶边缘，忍不住探头往里看。一股阴气顺着你的目光窜上来，你的影子开始疯狂扭动。你被阴气沾染，后续所有公交都会无视你。你在站台等到天亮，没有一辆车为你停下。
-
-        💀 结局：阴气沾染 · 被公交遗忘`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act7: {
-                id: 'act7',
-                text: `你站在站台上，心里只有一个念头——赶紧离开这个鬼地方。就在这时，两道车灯穿透雨雾，缓缓驶来。车头清晰地标着「71路」，你心里涌起一阵狂喜。车辆停稳开门，站台上的其他乘客开始向前挪动。你注意到队伍不算长，但想起了纸条上的第七条：不要抢先登车。你急得想跺脚，但又不敢第一个冲上去——可是如果上晚了，满载了怎么办？你心里七上八下。`,
-                options: [
-                    { text: 'A. 赶紧离开这个鬼地方，跑去第一个登车', next: 'act7_a' },
-                    { text: 'B. 安静排队，第二名有序登车', next: 'act7_b' },
-                    { text: 'C. 站在队伍末尾，等所有人上完再上车', next: 'act7_c' }
-                ]
-            },
-            act7_a: {
-                id: 'act7_a',
-                text: `💀 你实在受不了这雨夜了，拔腿就冲向车门，第一个跳了上去。但你刚踏上踏板，就感到一股力量把你“按”进了一个空座位里，车门在你身后砰地关上。你惊恐地发现，自己变成了那个被顶替的亡魂，公车驶入无尽的雨夜环路，永远到不了终点。
-
-        💀 结局：亡魂顶替 · 雨夜环路`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act7_b: {
-                id: 'act7_b',
-                text: `你深吸一口气，压住狂奔的冲动，排在第二位，安静地上了车。你感到一阵轻微的阻力，但很快通过了。车门关闭，你坐到靠窗的位置，心里那块石头总算落了地。你望着窗外的雨雾，旅程才刚刚开始。`,
-                options: [
-                    { text: '继续乘车', next: 'scene1' }
-                ]
-            },
-            act7_c: {
-                id: 'act7_c',
-                text: `💀 你决定谦让，站在队伍最后。但前面的乘客都上去后，车门在你面前砰地锁死，公车径直开走。你愣在原地，尾灯在雨雾中越来越远。你被永远留在了这个午夜站台。
-
-        💀 结局：满载遗弃 · 永久滞留`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene1: {
-                id: 'scene1',
-                text: `公车在雨夜中开了几分钟，停在一个无名站点。车门打开，一个身影走了上来——你差点叫出声，因为那正是之前在站台上给你递纸巾的黑色雨衣人！他穿着同样的雨衣，身型一模一样，径直朝你走来。你心里一阵发毛，想躲又不敢动，只能僵坐在座位上，眼睛紧盯着窗外。他在你旁边的过道站定，似乎在看你的反应。你脑子里疯狂回忆纸条上的规则，只求他别再靠近。`,
-                options: [
-                    { text: 'A. 安坐原位，视线看向窗外，不主动对视、不搭话', next: 'scene1_a' },
-                    { text: 'B. 起身换到后排角落刻意躲避', next: 'scene1_b' },
-                    { text: 'C. 主动开口询问对方目的地', next: 'scene1_c' }
-                ]
-            },
-            scene1_a: {
-                id: 'scene1_a',
-                text: `你死死盯着窗外，假装没看见他。他站了片刻，像在端详你，然后慢慢移开了脚步，走到车厢后部。你长出一口气，发现自己后背全是冷汗。你隐约觉得，他似乎不是为了伤害你而来，反而更像是在……保护你？你甩甩头，不敢多想。`,
-                options: [
-                    { text: '继续前行', next: 'scene2' }
-                ]
-            },
-            scene1_b: {
-                id: 'scene1_b',
-                text: `💀 你实在扛不住这种压力，起身想躲到后排去。但你的恐惧被怨灵捕捉到了，阴气悄悄缠上了你的衣角。此后你每做一个决定，都更容易触发幻境陷阱。
-
-        💀 结局：畏惧标记 · 幻境缠身`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene1_c: {
-                id: 'scene1_c',
-                text: `💀 你实在忍不住，开口问他：“你要去哪儿？”他猛地转头，帽檐下爆发出刺骨的寒气，车厢灯光瞬间熄灭。黑暗中你听到无数低语，灯再亮时，你已经不再车上了。
-
-        💀 结局：触犯规则 · 寒气吞噬`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene2: {
-                id: 'scene2',
-                text: `车载广播忽然响起：“下一站，地下通道入口站。”你心里一紧——又是地下通道。你看了看时间，00:52，通道还没封闭。站台外侧确实有通往地下的阶梯，黑洞洞的，冒着白气。你心里开始嘀咕：要不下车看看？可规则说了“非必要不进入”，你纠结得不行。旁边的黑雨衣男人一直沉默，你突然想从他那里得到点暗示，但又怕打破规则。`,
-                options: [
-                    { text: 'A. 安稳留在车内，全程不下车', next: 'scene2_a' },
-                    { text: 'B. 开门后下车前往地下通道换乘', next: 'scene2_b_branch' },
-                    { text: 'C. 询问旁边的男人', next: 'scene2_c_bad' }
-                ]
-            },
-            scene2_a: {
-                id: 'scene2_a',
-                text: `你定了定神，决定不下车。车门打开时，你看到站台外的阶梯被浓雾覆盖，似乎有什么东西在移动。你移开视线，直到车门关闭。公车重新启动，你回头望去，阶梯和雾气都消失了。你暗自庆幸自己没有冲动。`,
-                options: [
-                    { text: '继续乘车', next: 'scene3' }
-                ]
-            },
-            scene2_b_branch: {
-                id: 'scene2_b_branch',
-                text: `你犹豫再三，还是站起身，准备下车。但旁边的黑雨衣男人纹丝不动，像一堵墙挡在你面前。你心里急了：他是故意不让我下吗？还是说他根本就不是活人？你该怎么做？`,
-                options: [
-                    { text: 'A. 留在车里，不下车', next: 'scene2_a' },
-                    { text: 'B. 请他让一让', next: 'scene2_b_bad' },
-                    { text: 'C. 直接从他身旁挤过去下车', next: 'scene2_b_bad2' }
-                ]
-            },
-            scene2_b_bad: {
-                id: 'scene2_b_bad',
-                text: `💀 你开口：“麻烦让一下。”他缓缓转过头，用空洞的声音说：“你违背了规则。”话音刚落，灯光熄灭，你失去了所有意识。
-
-        💀 结局：违背规则六 · 永失言语`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene2_b_bad2: {
-                id: 'scene2_b_bad2',
-                text: `💀 你强行挤过去冲下车，但踏上站台的一瞬间，浓雾包裹了你，你的影子疯狂扭曲，最终你不再拥有自己的影子。
-
-        💀 结局：影子扭曲 · 高危惩罚`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene2_c_bad: {
-                id: 'scene2_c_bad',
-                text: `💀 你转头问旁边的男人：“你说，我该不该下车？”他沉默了一会儿，然后用一种非人的声音回答：“你问了不该问的。”之后的事你再也记不起来了。
-
-        💀 结局：违背规则六 · 永失言语`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene3: {
-                id: 'scene3',
-                text: `公车驶入一段无路灯的偏僻路段，车厢里的灯光开始不稳定地闪烁。你抬头看向车头的线路牌，原本清晰的「71路」字样正在慢慢淡去，开始扭曲成奇怪的符号。你心里咯噔一下——这条线路在发生变化！你想起纸条上说过“夜间会有编号杂乱的临时班车”，可这辆车明明就是71路啊？你手心出汗，不知道是该立刻下车，还是等等看。就在这时，旁边的黑雨衣男人忽然低声说了一句：“快下车，这不是你应该在的地方。”`,
-                options: [
-                    { text: 'A. 立刻按下下车按钮，在下一站下车', next: 'scene3_a' },
-                    { text: 'B. 留在车内静观标识变化', next: 'scene3_b_branch' },
-                    { text: 'C. 上前提醒司机线路牌异常', next: 'scene3_c' }
-                ]
-            },
-            scene3_a: {
-                id: 'scene3_a',
-                text: `你果断按下下车按钮，在下一站冲了下去。回头的瞬间，你看见车头的标识彻底变成了乱码，公车驶入一片虚幻的环路，消失了。你站在陌生的站台上，心脏狂跳，但你知道自己逃过了一劫。不久后，另一辆正规 71 路驶来，你重新上车。`,
-                options: [
-                    { text: '继续等候', next: 'scene4' }
-                ]
-            },
-            scene3_b_branch: {
-                id: 'scene3_b_branch',
-                text: `你犹豫了一下，没有动。但黑雨衣男人的话像钉子一样扎在你心里。你忍不住想：他为什么要帮我？万一他是骗我的呢？你陷入纠结，而线路牌继续异变。`,
-                options: [
-                    { text: 'A. 不相信他，留在车里，不下车', next: 'scene3_b_bad' },
-                    { text: 'B. 相信他，下车', next: 'scene3_a' },
-                    { text: 'C. 问他为什么', next: 'scene3_b_bad2' }
-                ]
-            },
-            scene3_b_bad: {
-                id: 'scene3_b_bad',
-                text: `💀 你决定不信任他，继续坐在座位上。线路牌完全异变后，公车驶入灰白色的虚空，永远到不了任何地方。
-
-        💀 结局：亡灵公路 · 无终点之旅`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene3_b_bad2: {
-                id: 'scene3_b_bad2',
-                text: `💀 你脱口而出：“为什么？”他顿了一下，然后说：“你不该问的。”车厢再次陷入黑暗。
-
-        💀 结局：违反规则六 · 永失言语`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene3_c: {
-                id: 'scene3_c',
-                text: `💀 你走上前想提醒司机，但他没有回头，车厢后方却浮现出大量模糊的人影，齐刷刷盯着你。你成了新的“提醒者”，永远留在那条异变的线路上。
-
-        💀 结局：干扰车辆 · 成为提醒者`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene4: {
-                id: 'scene4',
-                text: `公车停在一个简陋的站台，没有候车棚，只有一片泥泞的地面。一个白发老者走上前，敲了敲车窗：“小伙子，正规 71 路还得四十分钟，前面路口有短途摆渡车，更快，跟我来吧。”你看着他布满皱纹的脸，心里一阵动摇——你确实又冷又饿，想快点回家。可你转念一想，为什么大半夜会有老人在这里指路？你攥紧口袋里的纸条，迟迟做不了决定。`,
-                options: [
-                    { text: 'A. 听从老者前往路口坐摆渡车', next: 'scene4_a' },
-                    { text: 'B. 原地等候下一班正规 71 路', next: 'scene4_b' },
-                    { text: 'C. 沿公路徒步寻找其他站点', next: 'scene4_c' }
-                ]
-            },
-            scene4_a: {
-                id: 'scene4_a',
-                text: `💀 你选择相信老人，跟他上了摆渡车。但车门关上后，你发现这辆车悬浮在雾气中，根本没有轮子。老人转头，脸变成了一团白雾。
-
-        💀 结局：摆渡车 · 亡魂幻境`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene4_b: {
-                id: 'scene4_b',
-                text: `你摇了摇头：“不了，我等正规车。”老者叹了口气，消失在雨幕中。你等了约莫二十分钟，果然来了一辆正规 71 路，你再次有序上车，心里踏实了不少。`,
-                options: [
-                    { text: '继续乘车', next: 'scene5' }
-                ]
-            },
-            scene4_c: {
-                id: 'scene4_c',
-                text: `💀 你决定徒步，但公路两侧不断出现沉默的人影，你走了很久，发现路越走越长，雾气越来越浓，最终被永远困在了这条公路上。
-
-        💀 结局：公路徒步 · 被雾气困住`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene5: {
-                id: 'scene5',
-                text: `手机显示 01:05，广播提示：“地下通道现已封闭，请勿靠近。”站台铁门紧锁，缝隙里飘出白雾。你心里痒痒的，好奇那门后有什么，但理智告诉你不要靠近。车门开着，你坐在座位上，看着雾气在站台上翻滚。你忍不住想：下去看一眼应该没事吧？就一眼……可你又想起影子异动的规则，心里一阵发寒。`,
-                options: [
-                    { text: 'A. 全程留在车上，不下车', next: 'scene5_a' },
-                    { text: 'B. 短暂下车透气，远离铁门', next: 'scene5_b' },
-                    { text: 'C. 凑近铁门缝隙向内窥探', next: 'scene5_c' }
-                ]
-            },
-            scene5_a: {
-                id: 'scene5_a',
-                text: `你咬咬牙，把好奇心压了下去，留在车上。你看到雾气在站台上翻涌，铁门缝隙里似乎有东西在移动，但你闭眼不看，直到车门关闭。公车继续前行，你长出一口气。`,
-                options: [
-                    { text: '继续前行', next: 'scene6' }
-                ]
-            },
-            scene5_b: {
-                id: 'scene5_b',
-                text: `💀 你实在憋得慌，下车透了口气，虽然离铁门很远，但雾气已经沾上了你的鞋底。回到车上后，你的影子开始缓慢扭曲，阴气缠上了你。
-
-        💀 结局：阴气沾染 · 影子异动`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene5_c: {
-                id: 'scene5_c',
-                text: `你忍不住凑近铁门，透过缝隙往里看。寒气扑面而来，你的影子疯狂拉伸，像被拽住了一样。你看见黑雨衣男人在站台边看着你，似乎在看你会不会犯傻。`,
-                options: [
-                    { text: '进入补救 · 影子异动', next: 'scene5_remedy' }
-                ]
-            },
-
-            scene5_remedy: {
-                id: 'scene5_remedy',
-                text: `你的影子在地上疯狂扭动，像一滩沸腾的黑水。你心里又惊又怕，恨不得立刻跑回车上，但又怕一动就出事。你看见黑雨衣男人仍然远远站着，没有靠近。你强迫自己冷静下来。`,
-                options: [
-                    { text: 'A. 立刻奔跑返回公交车', next: 'scene5_remedy_a' },
-                    { text: 'B. 持续凑近窥探通道深处', next: 'scene5_remedy_b' },
-                    { text: 'C. 原地僵立不动，等待影子恢复', next: 'scene5_remedy_c' }
-                ]
-            },
-            scene5_remedy_a: {
-                id: 'scene5_remedy_a',
-                text: `💀 你太害怕了，撒腿就跑，但影子瞬间弹起裹住了你，你感到窒息，最终被影子吞噬。
-
-        💀 结局：奔跑搅动 · 影子吞噬`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene5_remedy_b: {
-                id: 'scene5_remedy_b',
-                text: `💀 你反而更靠近铁门，想看清楚里面有什么，结果一股巨大的吸力将你拽进废墟幻境。
-
-        💀 结局：持续窥探 · 坠入废墟`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene5_remedy_c: {
-                id: 'scene5_remedy_c',
-                text: `你闭上眼睛，强行让自己定住。几秒后，影子慢慢恢复了正常，雾气也退去。司机鸣笛催促，你快步回到车上，总算又躲过一劫。`,
-                options: [
-                    { text: '继续前行', next: 'scene6' }
-                ]
-            },
-
-            scene6: {
-                id: 'scene6',
-                text: `车厢显示屏忽然闪烁：“终点站即将到达，请全体乘客下车。”你抬头看向窗外，外面仍是荒郊野岭，根本没有城市的影子。你心里犯起嘀咕：这又是幻境？还是真的到站了？你想起纸条上说过夜间车辆时间错乱，可这也太离谱了。你拿不定主意，是信显示屏，还是信自己的判断？`,
-                options: [
-                    { text: 'A. 静坐原位，无视提示不下车', next: 'scene6_a' },
-                    { text: 'B. 前往驾驶室确认站点', next: 'scene6_b' },
-                    { text: 'C. 提前站在车门等候下车', next: 'scene6_c' }
-                ]
-            },
-            scene6_a: {
-                id: 'scene6_a',
-                text: `你决定相信自己的直觉，无视显示屏。车停在一个空站台，你始终没动。几分钟后，显示屏恢复了正常，公车继续前行。你长舒一口气——果然又是试探。`,
-                options: [
-                    { text: '继续前行', next: 'scene7' }
-                ]
-            },
-            scene6_b: {
-                id: 'scene6_b',
-                text: `💀 你忍不住跑去驾驶室问司机，但他只回头看了你一眼，什么也没说。之后无论你选哪条路，都会触发惩罚。
-
-        💀 结局：询问幻境 · 道路惩罚`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene6_c: {
-                id: 'scene6_c',
-                text: `💀 你相信了显示屏，提前下车，结果被困在一个孤立站台，没有班车经过。
-
-        💀 结局：轻信幻境 · 孤立站台`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            scene7: {
-                id: 'scene7',
-                text: `行驶至 01:47，前方路面一分为二，左边是老路，右边是新路。司机回头，用沙哑的声音问：“老路故障频发，新路极少有人通行。你想走哪边？我听你的。”你心里顿时紧张起来——这又是一个难题。你既不了解路况，也不知道哪条更安全。你暗自嘀咕：我哪知道选什么？万一选错就完了。你盯着两条路，感觉它们都像通往不同的深渊。`,
-                options: [
-                    { text: 'A. 告知司机驶入左侧老路', next: 'scene7_a' },
-                    { text: 'B. 提议司机走右侧新路', next: 'scene7_b' },
-                    { text: 'C. 交由司机自行判断', next: 'scene7_c' }
-                ]
-            },
-            scene7_a: {
-                id: 'scene7_a',
-                text: `💀 你选了老路，但驶入后路灯熄灭，积水浮起无数人影，路障封死前路，公车开始无限循环。
-
-        💀 结局：老路 · 雨夜循环环路`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene7_b: {
-                id: 'scene7_b',
-                text: `💀 你选了新路，但道路无限延伸，没有尽头，司机渐渐失去神志，你也迷失在边界之外。
-
-        💀 结局：新路 · 无边亡灵公路`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene7_c: {
-                id: 'scene7_c',
-                text: `你把决定权交还给司机。他点了点头，立刻调头，驶入一条你从未注意到的岔路。车辆平稳前行，沿途的雾气和怪异人影都主动避让。你心里感叹：还是交给专业的人靠谱。又行驶了一阵，前方出现一个站台，路边站着几排人影，身形像极了多年不见的老友。你几乎要挥手，但硬生生忍住了。`,
-                options: [
-                    { text: 'A. 目视前方，不去看向路边人群', next: 'scene7_c_a' },
-                    { text: 'B. 隔着车窗仔细打量这群背对道路的人', next: 'scene7_c_b' },
-                    { text: 'C. 敲窗尝试吸引路边人影注意', next: 'scene7_c_c' }
-                ]
-            },
-            scene7_c_a: {
-                id: 'scene7_c_a',
-                text: `你强迫自己收回目光，直视前方。公交车平稳驶过，那些人影始终没有转身。走远后，他们慢慢消失在雾气里，没有异常发生。你松了口气，继续前行。`,
-                options: [
-                    { text: '继续前行，前往总站', next: 'act9' }
-                ]
-            },
-            scene7_c_b: {
-                id: 'scene7_c_b',
-                text: `💀 你忍不住仔细打量那些人影，越看越觉得熟悉，就在这时，所有人影同时转过头来——他们的脸是空的。车窗被雾气覆盖，你被拖入那片空地，成了他们中的一员。
-
-        💀 结局：打量人影 · 成为空壳`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            scene7_c_c: {
-                id: 'scene7_c_c',
-                text: `💀 你敲了敲车窗，想引起注意，结果所有人影齐齐转身，朝公车涌来，车门被强行打开，你被拉入人群，永远背对道路。
-
-        💀 结局：敲窗吸引 · 被同化`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-
-            act9: {
-                id: 'act9',
-                text: `手机显示 02:11，总站站牌终于出现在雨雾尽头。你心里一阵激动，可就在这时，车厢广播又响了：“到站请勿立刻离开车厢，请等候司机先行下车。”你愣住了——这是新规则？还是陷阱？你想起之前的经历，广播真假难辨，可如果不听，万一又是惩罚怎么办？你犹豫不决，手心全是汗。`,
-                options: [
-                    { text: 'A. 听从广播留在座位等候司机先下', next: 'act9_a' },
-                    { text: 'B. 车门一开直接下车无视广播', next: 'act9_b' },
-                    { text: 'C. 走到驾驶室轻声询问广播真伪', next: 'act9_c' }
-                ]
-            },
-            act9_a: {
-                id: 'act9_a',
-                text: `💀 你决定信广播，留在座位。但司机一直没下车，广播反复播放，白雾最终封锁了出口，你被困在了总站。
-
-        💀 结局：盲目听从 · 封锁出口`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act9_b: {
-                id: 'act9_b',
-                text: `💀 你不耐烦了，车门一开就冲了下去。但白雾中伸出无数只手，把你拖进了黑暗——广播是对的，你不该先下。
-
-        💀 结局：无视广播 · 被拉入黑暗`,
-                options: [
-                    { text: '重新候车', next: 'start' }
-                ]
-            },
-            act9_c: {
-                id: 'act9_c',
-                text: `你决定去问司机。他头也不回，低声说：“午夜广播真假混杂，不可全信，也不可全违。”车到站后，他率先下车，回头示意你跟上。你犹豫了零点几秒，然后跟了上去。`,
-                options: [
-                    { text: '跟随司机下车', next: 'final_a' }
-                ]
-            },
-
-            final_a: {
-                id: 'final_a',
-                text: `✨✨✨ 【完美通关 · 午夜公交幸存者】 ✨✨✨
-
-        你紧跟司机身后，迈步走向出口标线。他周身的气场让所有黑影都不敢靠近。你跨过标线的一瞬间——雨夜、浓雾、黑影全部消散。你站在一条普通的街道上，路灯暖黄，远处传来早班的环卫车声。你低头看手机：02:23，雨停了。你回头，公交站静静立在街角，像一个普通的深夜站台。而你心里清楚，你刚刚从亡灵夹层里走了出来。
-
-        🏆 你，是今夜唯一平安回归的乘客。
-
-        —— 规则，是用来活下去的。 ——`,
-                options: [
-                    { text: '重新挑战规则', next: 'start' }
-                ]
-            }
-        };
-
-        // ================================================================
-        //  🎮  游戏引擎（保持不变）
-        // ================================================================
-
-        let currentNodeId = 'start';
-        const storyDisplay = document.getElementById('storyDisplay');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const sceneIndicator = document.getElementById('sceneIndicator');
-        const statusIndicator = document.getElementById('statusIndicator');
-
-        function renderNode(nodeId) {
-            const node = gameData[nodeId];
-            if (!node) {
-                storyDisplay.innerHTML = '<p>⚠️ 规则崩塌，世界紊乱。请刷新页面。</p>';
-                optionsContainer.innerHTML = '';
-                return;
-            }
-
-            let rawText = node.text;
-            rawText = rawText.replace(/「(.*?)」/g, '<span class="hl-rule">「$1」</span>');
-            rawText = rawText.replace(/✅/g, '<span class="hl-safe">✅</span>');
-            rawText = rawText.replace(/💀/g, '<span class="hl-danger">💀</span>');
-            rawText = rawText.replace(/✨/g, '<span class="hl-glow">✨</span>');
-            rawText = rawText.replace(/⚠️/g, '<span class="hl-rule">⚠️</span>');
-
-            const paragraphs = rawText.split(/\n\s*\n/).filter(p => p.trim() !== '');
-            const htmlContent = paragraphs.map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
-            storyDisplay.innerHTML = htmlContent;
-
-            const sceneName = node.id;
-            let sceneLabel = '候车';
-            let statusText = '观察';
-            let statusClass = 'safety';
-
-            if (sceneName.startsWith('act')) {
-                const num = sceneName.replace('act', '').replace(/_[a-z]/, '');
-                sceneLabel = `第${num}幕`;
-            } else if (sceneName.startsWith('scene')) {
-                const num = sceneName.replace('scene', '').replace(/_[a-z]/, '');
-                sceneLabel = `场景${num}`;
-            } else if (sceneName === 'start') {
-                sceneLabel = '站台';
-            } else if (sceneName === 'final_a') {
-                sceneLabel = '🏆 完美结局';
-            } else if (sceneName.includes('final') || sceneName.includes('end')) {
-                sceneLabel = '结局';
-            }
-
-            if (rawText.includes('💀') && !rawText.includes('✅') && !rawText.includes('✨')) {
-                statusText = '⚰️ 规则失效';
-                statusClass = 'danger';
-            } else if (rawText.includes('✨✨✨') || rawText.includes('完美通关')) {
-                statusText = '🏆 生还';
-                statusClass = 'escape';
-            } else if (rawText.includes('✅') || rawText.includes('安全')) {
-                statusText = '遵守规则';
-                statusClass = 'safety';
-            } else if (rawText.includes('⚠️') || rawText.includes('补救')) {
-                statusText = '边缘试探';
-                statusClass = 'safety';
-            } else {
-                statusText = '阅读规则';
-                statusClass = 'safety';
-            }
-
-            sceneIndicator.textContent = sceneLabel;
-            statusIndicator.textContent = statusText;
-            statusIndicator.className = statusClass;
-
-            optionsContainer.innerHTML = '';
-            if (node.options && node.options.length > 0) {
-                node.options.forEach((opt, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn';
-                    btn.textContent = opt.text;
-                    btn.addEventListener('click', function() {
-                        if (gameData[opt.next]) {
-                            currentNodeId = opt.next;
-                            renderNode(currentNodeId);
-                        } else {
-                            currentNodeId = 'start';
-                            renderNode('start');
-                        }
-                    });
-                    if (index < 9) {
-                        btn.setAttribute('data-key', index + 1);
-                    }
-                    optionsContainer.appendChild(btn);
-                });
-            } else {
-                const resetBtn = document.createElement('button');
-                resetBtn.className = 'option-btn';
-                resetBtn.textContent = '重新开始';
-                resetBtn.addEventListener('click', resetGame);
-                optionsContainer.appendChild(resetBtn);
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function resetGame() {
-            currentNodeId = 'start';
-            renderNode('start');
-        }
-
-        function showRules() {
-            currentNodeId = 'start';
-            renderNode('start');
-        }
-
-        document.addEventListener('keydown', (e) => {
-            const key = parseInt(e.key);
-            if (key >= 1 && key <= 9) {
-                const btns = optionsContainer.querySelectorAll('.option-btn');
-                if (btns[key - 1]) {
-                    btns[key - 1].click();
-                }
-            }
-            if (e.key === 'r' || e.key === 'R') {
-                resetGame();
-            }
-        });
-
-        renderNode('start');
-
-        const storyEl = document.getElementById('storyDisplay');
-        storyEl.addEventListener('wheel', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-    </script>
+    <footer>
+        本内容仅为文字解谜小游戏，无真实恐怖元素
+    </footer>
 </body>
 </html>
