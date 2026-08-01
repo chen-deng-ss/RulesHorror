@@ -41,7 +41,6 @@
         <div class="story-text" id="storyDisplay"></div>
         <div class="options-grid" id="optionsContainer"></div>
         <div class="reset-area">
-            <a href="index.html" class="reset-btn">🏠 返回合集首页</a>
             <button class="reset-btn" onclick="resetGame()">⟳ 重新探店</button>
             <button class="reset-btn" onclick="showRules()">📜 再看守则</button>
         </div>
@@ -49,8 +48,7 @@
 
     <script>
         // ================================================================
-        //  猛男咖啡店 · 账单明细版
-        //  沙发区和窗边区已按新逻辑调整
+        //  猛男咖啡店 · 最终版（无正确/错误标注）
         // ================================================================
 
         let budget = 150;
@@ -132,9 +130,15 @@
 
         声音很热情，但笑容……没有变过。你盯着他看了三秒，那个嘴角的弧度分毫未动，像画上去的。
 
-        你打了个寒颤，移开目光。
+        你打了个寒颤，移开目光。`,
+                options: [
+                    { text: '继续往下看', next: 'start_continued' }
+                ]
+            },
 
-        你注意到墙上贴着一张纸，上面写着：
+            start_continued: {
+                id: 'start_continued',
+                text: `你注意到墙上贴着一张纸，上面写着：
 
         【猛男咖啡店 · 顾客守则】
 
@@ -154,6 +158,7 @@
                     { text: 'B. 这什么鬼店？我偏不信邪！', next: 'seat_impulsive' }
                 ]
             },
+
             seat_impulsive: {
                 id: 'seat_impulsive',
                 text: `你冷哼一声，大摇大摆走进店内，一屁股坐了下来。
@@ -203,9 +208,9 @@
 
         “小姐姐，救援服务收费50元，已经加到您的账单上了哦。”店员笑容灿烂地补充道。
 
-        你坐回沙发（这次老老实实没再陷进去），好不容易拿起了菜单。`,
+        你坐回沙发（这次老老实实没再陷进去），刚松了口气，就发现店员俯身帮你放菜单时，紧身背心下的胸肌正好在你眼前晃过——你忍不住瞄了一眼。`,
                 options: [
-                    { text: '继续点单', next: 'bean_selection', cost: 50, costDesc: '叉车救援费' }
+                    { text: '继续点单', next: 'muscle_encounter', cost: 50, costDesc: '叉车救援费' }
                 ]
             },
             ending_sofa_trap: {
@@ -222,7 +227,7 @@
                 text: `你坐在吧台前，正对着咖啡机。店员保持着笑容推过来一杯水：“小姐姐请用。”
         你伸手去接——想起守则上关于单手接物的规定。`,
                 options: [
-                    { text: 'A. 双手恭敬接过', next: 'bean_selection' },
+                    { text: 'A. 双手恭敬接过', next: 'muscle_encounter' },
                     { text: 'B. 单手随意拿起来', next: 'waiter_grab' }
                 ]
             },
@@ -230,15 +235,15 @@
                 id: 'waiter_grab',
                 text: `你单手接水，店员的笑容弧度不变，但声音突然变冷了一点：“小姐姐，单手接东西是不礼貌的哦。”
         他握住你的手：“我们店有‘礼仪矫正服务’，收费50元。”
-        账单增加了50元。你口袋里的150元开始变得紧张。`,
-                options: [ { text: '交钱，继续', next: 'bean_selection', cost: 50, costDesc: '礼仪矫正费' } ]
+        你付了钱，心里正不爽，一抬头却发现他正俯身放纸巾盒，胸肌在你眼前晃了晃。`,
+                options: [ { text: '交钱，继续', next: 'muscle_encounter', cost: 50, costDesc: '礼仪矫正费' } ]
             },
             seat_window: {
                 id: 'seat_window',
                 text: `你坐在窗边，阳光很好。窗玻璃上贴着一张张薄薄的红色剪纸，形状扭曲，隐约能看出人脸的轮廓。
         店员微笑着递来菜单：“小姐姐你被拍到了哦，会成为我们店的‘今日顾客’展示在门口呢。”`,
                 options: [
-                    { text: 'A. 硬着头皮坐好，点单', next: 'bean_selection' },
+                    { text: 'A. 硬着头皮坐好，点单', next: 'muscle_encounter' },
                     { text: 'B. 拉上窗帘', next: 'ending_curtain' }
                 ]
             },
@@ -251,6 +256,43 @@
         “既然你这么喜欢窗花，不如自己也成为其中一张？”
 
         你感觉身体被拉平，贴在玻璃上，阳光透过你变成了一幅新的剪纸。路过的行人纷纷拍照。`,
+                options: [ { text: '💀 重新开始', next: 'start' } ]
+            },
+
+            // ---------- 看胸肌互动（选项无标注） ----------
+            muscle_encounter: {
+                id: 'muscle_encounter',
+                text: `你刚坐定，店员俯身为你倒水或递菜单时，紧身背心下的肌肉线条不经意间映入你的眼帘。你想起守则第一条——不要直视超过3秒。
+
+        但有时候，眼睛就是不听使唤。你感觉到自己的目光正不由自主地游移……`,
+                options: [
+                    { text: 'A. 用力移开目光，看向窗外', next: 'bean_selection' },
+                    { text: 'B. 忍不住多看了两秒', next: 'muscle_fine', cost: 50, costDesc: '观赏费（看胸肌）' },
+                    { text: 'C. 目不转睛地盯着看', next: 'ending_muscle_squash' }
+                ]
+            },
+            muscle_fine: {
+                id: 'muscle_fine',
+                text: `你多看了两秒，店员似乎察觉到了，他微笑着拿出一个小本子：“小姐姐，观赏费每秒5元，您看了3秒，收费50元，已经记在账上了哦。”
+
+        你尴尬地收回目光，假装什么都没发生。`,
+                options: [
+                    { text: '继续点单', next: 'bean_selection' }
+                ]
+            },
+            ending_muscle_squash: {
+                id: 'ending_muscle_squash',
+                text: `你目不转睛地盯着店员的胸肌看了足足十秒。他的笑容弧度不变，但缓缓朝你走来。
+
+        你后退，他逼近，直到你被逼到墙角。然后他张开双臂——用胸肌把你夹在了中间。
+
+        你的肋骨发出“嘎吱”声。
+
+        店员低头，笑容灿烂：“小姐姐，要遵守规则哦。”
+
+        你被夹扁了。
+
+        💀 结局：你被胸肌夹扁了。`,
                 options: [ { text: '💀 重新开始', next: 'start' } ]
             },
 
@@ -601,6 +643,7 @@
             let sceneLabel = '门口';
             if (sceneName === 'rules_display') sceneLabel = '守则';
             else if (sceneName.startsWith('seat')) sceneLabel = '选座';
+            else if (sceneName.startsWith('muscle')) sceneLabel = '⚠️ 看胸肌';
             else if (sceneName.startsWith('bean') || sceneName.startsWith('roast') || sceneName.startsWith('flavor')) sceneLabel = '选豆';
             else if (sceneName.startsWith('order')) sceneLabel = '饮品';
             else if (sceneName.startsWith('dessert')) sceneLabel = '甜品';
